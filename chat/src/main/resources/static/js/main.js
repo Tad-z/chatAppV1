@@ -37,11 +37,38 @@ function onConnected() {
     // tell username to the server
     stompClient.send('/app/chat.addUser',
     {},
-    JSON.stringify({sender: username}))
+    JSON.stringify({sender: username, type: 'JOIN'}));
+
+    connectingElement.classList.add('hidden')
+}
+
+function onError() {
+    connectingElement.textContent = "Could not connect, Refresh the page";
+    connectingElement.style.color = 'red';
 }
 
 function onMessageReceived() {
 
 }
 
+function sendMessage(event) {
+    var messageContent = messageInput.value.trim();
+
+    if (messageContent && stompClient) {
+        var chatMessage = {
+            sender: username,
+            content: messageContent,
+            type: 'CHAT'
+        };
+        stompClient.send(
+            '/app/chat.sendMessage',
+            {},
+            JSON.stringify(chatMessage)
+        );
+        messageInput.content = '';
+    }
+    event.preventDefault();
+}
+
 usernameForm.addEventListener('submit', connect, true)
+messageForm.addEventListener('submit', sendMessage, true)
